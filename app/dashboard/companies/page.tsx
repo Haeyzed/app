@@ -1,3 +1,5 @@
+"use client" // Add this line at the top
+
 import { ReusableDataTable } from "@/components/reusable-data-table"
 import { companyColumns } from "@/components/table-columns"
 import companiesData from "@/data/companies.json"
@@ -5,12 +7,10 @@ import companiesData from "@/data/companies.json"
 export default function CompaniesPage() {
     const handleRowAction = (action: string, row: any) => {
         console.log(`${action} action for:`, row)
-        // Handle different actions (edit, view, duplicate, delete)
     }
 
     const handleAddCompany = () => {
         console.log("Add new company")
-        // Handle adding new company
     }
 
     return (
@@ -31,4 +31,3 @@ export default function CompaniesPage() {
         </div>
     )
 }
-

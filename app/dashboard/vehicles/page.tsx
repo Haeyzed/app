@@ -1,3 +1,5 @@
+"use client"
+
 import { ReusableDataTable } from "@/components/reusable-data-table"
 import { vehicleColumns } from "@/components/table-columns"
 import vehiclesData from "@/data/vehicles.json"

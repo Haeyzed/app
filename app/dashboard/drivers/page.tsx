@@ -1,3 +1,5 @@
+"use client"
+
 import { ReusableDataTable } from "@/components/reusable-data-table"
 import { driverColumns } from "@/components/table-columns"
 import driversData from "@/data/drivers.json"
