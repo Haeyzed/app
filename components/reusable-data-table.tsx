@@ -75,6 +75,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ApiResponse } from "@/types"
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: string | number }) {
@@ -97,7 +98,7 @@ function DragHandle({ id }: { id: string | number }) {
 }
 
 interface ReusableDataTableProps<TData> {
-  data: TData[]
+  data: ApiResponse<TData[]> | TData[]
   columns: ColumnDef<TData>[]
   title?: string
   enableDragAndDrop?: boolean
@@ -108,6 +109,11 @@ interface ReusableDataTableProps<TData> {
   onRowAction?: (action: string, row: TData) => void
   addButtonText?: string
   onAddClick?: () => void
+  onPageChange?: (page: number) => void
+  currentPage?: number
+  totalPages?: number
+  totalItems?: number
+  isLoading?: boolean
 }
 
 function DraggableRow<TData>({ 
@@ -153,14 +159,23 @@ export function ReusableDataTable<TData>({
   onRowAction,
   addButtonText = "Add Item",
   onAddClick,
+  onPageChange,
+  currentPage = 1,
+  totalPages = 1,
+  totalItems = 0,
+  isLoading = false,
 }: ReusableDataTableProps<TData>) {
-  const [data, setData] = React.useState(() => initialData)
+  // Handle both API response structure and direct array
+  const isApiResponse = 'data' in initialData && Array.isArray(initialData.data)
+  const data = isApiResponse ? initialData.data : initialData as TData[]
+  const meta = isApiResponse ? (initialData as ApiResponse<TData[]>).meta : undefined
+
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
+    pageIndex: (currentPage - 1) || 0,
     pageSize,
   })
   const [globalFilter, setGlobalFilter] = React.useState("")
@@ -292,11 +307,16 @@ export function ReusableDataTable<TData>({
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (active && over && active.id !== over.id) {
-      setData((data) => {
-        const oldIndex = dataIds.indexOf(active.id)
-        const newIndex = dataIds.indexOf(over.id)
-        return arrayMove(data, oldIndex, newIndex)
-      })
+      // Handle drag and drop reordering if needed
+      console.log("Drag end:", { active, over })
+    }
+  }
+
+  const handlePageChange = (page: number) => {
+    if (onPageChange) {
+      onPageChange(page)
+    } else {
+      table.setPageIndex(page - 1)
     }
   }
 
@@ -388,7 +408,16 @@ export function ReusableDataTable<TData>({
                   ))}
                 </TableHeader>
                 <TableBody>
-                  {table.getRowModel().rows?.length ? (
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={finalColumns.length}
+                        className="h-24 text-center"
+                      >
+                        Loading...
+                      </TableCell>
+                    </TableRow>
+                  ) : table.getRowModel().rows?.length ? (
                     <SortableContext
                       items={dataIds}
                       strategy={verticalListSortingStrategy}
@@ -435,7 +464,16 @@ export function ReusableDataTable<TData>({
                 ))}
               </TableHeader>
               <TableBody>
-                {table.getRowModel().rows?.length ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={finalColumns.length}
+                      className="h-24 text-center"
+                    >
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
                     <DraggableRow 
                       key={row.id} 
@@ -462,7 +500,7 @@ export function ReusableDataTable<TData>({
           <div className="flex items-center justify-between px-4">
             <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
               {table.getFilteredSelectedRowModel().rows.length} of{" "}
-              {table.getFilteredRowModel().rows.length} row(s) selected.
+              {meta?.total || table.getFilteredRowModel().rows.length} row(s) selected.
             </div>
             <div className="flex w-full items-center gap-8 lg:w-fit">
               <div className="hidden items-center gap-2 lg:flex">
@@ -490,15 +528,15 @@ export function ReusableDataTable<TData>({
                 </Select>
               </div>
               <div className="flex w-fit items-center justify-center text-sm font-medium">
-                Page {table.getState().pagination.pageIndex + 1} of{" "}
-                {table.getPageCount()}
+                Page {meta?.current_page || (table.getState().pagination.pageIndex + 1)} of{" "}
+                {meta?.last_page || table.getPageCount()}
               </div>
               <div className="ml-auto flex items-center gap-2 lg:ml-0">
                 <Button
                   variant="outline"
                   className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() => table.setPageIndex(0)}
-                  disabled={!table.getCanPreviousPage()}
+                  onClick={() => handlePageChange(1)}
+                  disabled={!meta ? !table.getCanPreviousPage() : currentPage <= 1}
                 >
                   <span className="sr-only">Go to first page</span>
                   <IconChevronsLeft />
@@ -507,8 +545,8 @@ export function ReusableDataTable<TData>({
                   variant="outline"
                   className="size-8"
                   size="icon"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!meta ? !table.getCanPreviousPage() : currentPage <= 1}
                 >
                   <span className="sr-only">Go to previous page</span>
                   <IconChevronLeft />
@@ -517,8 +555,8 @@ export function ReusableDataTable<TData>({
                   variant="outline"
                   className="size-8"
                   size="icon"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!meta ? !table.getCanNextPage() : currentPage >= totalPages}
                 >
                   <span className="sr-only">Go to next page</span>
                   <IconChevronRight />
@@ -527,8 +565,8 @@ export function ReusableDataTable<TData>({
                   variant="outline"
                   className="hidden size-8 lg:flex"
                   size="icon"
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  disabled={!table.getCanNextPage()}
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={!meta ? !table.getCanNextPage() : currentPage >= totalPages}
                 >
                   <span className="sr-only">Go to last page</span>
                   <IconChevronsRight />
