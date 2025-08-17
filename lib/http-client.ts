@@ -1,7 +1,7 @@
-import { auth } from "./auth"
+import { auth } from "@/auth"
 import { Company, Driver, Vehicle, Vendor, Wallet, User, NfcTag, ApiResponse } from "@/types"
 
-const API_BASE_URL = "https://cupidapiv2.smartflowtech.com/api"
+const API_BASE_URL = "https://cupidapiv2.smartflowtech.org/api"
 
 class HttpClient {
   private async getHeaders(): Promise<HeadersInit> {
@@ -29,7 +29,7 @@ class HttpClient {
   async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
     const headers = await this.getHeaders()
     const url = new URL(`${API_BASE_URL}${endpoint}`)
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -48,7 +48,7 @@ class HttpClient {
 
   async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     const headers = await this.getHeaders()
-    
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",
       headers,
@@ -60,7 +60,7 @@ class HttpClient {
 
   async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     const headers = await this.getHeaders()
-    
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "PUT",
       headers,
@@ -72,7 +72,7 @@ class HttpClient {
 
   async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
     const headers = await this.getHeaders()
-    
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "DELETE",
       headers,

@@ -44,7 +44,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -52,17 +52,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         try {
-          const response = await fetch("https://cupidapiv2.smartflowtech.com/api/oauth/login", {
+          const response = await fetch("https://cupidapiv2.smartflowtech.org/api/oauth/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "clientid": "97d44d6b-d3e9-428d-96d6-1ea3a307fd42",
-              "clientsecret": "DHjcQpNGS28E0ofilYTDNtheY0avfnn2NfENO4oP"
+              Clientid: "9a3ff3d3-9d3d-4dc5-8b7e-d8bf27db6a13",
+              clientsecret: "jdEvlFEVYjZxETiPkMVDLjzWpJzl2osefZAkufsU",
             },
             body: JSON.stringify({
               email: credentials.email,
-              password: credentials.password
-            })
+              password: credentials.password,
+            }),
           })
 
           const data = await response.json()
@@ -78,14 +78,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             accessToken: data.data.access_token,
             refreshToken: data.data.refresh_token,
             user: data.data.cupid_user,
-            vendor: data.data.vendor
+            vendor: data.data.vendor,
           }
         } catch (error) {
           console.error("Auth error:", error)
           return null
         }
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -107,19 +107,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           isVendor: token.user?.is_vendor,
           activeVendor: token.user?.active_vendor,
           permissions: token.user?.permissions,
-          roles: token.user?.roles
+          roles: token.user?.roles,
         }
         session.accessToken = token.accessToken
         session.refreshToken = token.refreshToken
         session.vendor = token.vendor
       }
       return session
-    }
+    },
   },
   pages: {
-    signIn: "/login"
+    signIn: "/login",
   },
   session: {
-    strategy: "jwt"
-  }
+    strategy: "jwt",
+  },
 })
