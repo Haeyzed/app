@@ -76,4 +76,3 @@ export default function DriversPage() {
         </div>
     )
 }
-`headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
