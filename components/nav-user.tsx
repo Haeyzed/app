@@ -42,6 +42,10 @@ export function NavUser({
   const { isMobile } = useSidebar()
 
   const handleLogout = () => {
+    // Clear localStorage token
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken')
+    }
     signOut({ callbackUrl: "/login" })
   }
 

@@ -29,15 +29,6 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
-  interface JWT {
-    accessToken?: string
-    refreshToken?: string
-    user?: any
-    vendor?: any
-  }
-}
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     CredentialsProvider({
@@ -71,6 +62,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw new Error(data.message || "Login failed")
           }
 
+          // Store token in localStorage for client-side access
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('accessToken', data.data.access_token)
+          }
+
           return {
             id: data.data.cupid_user.id.toString(),
             email: data.data.cupid_user.email,
@@ -97,17 +93,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token
     },
-    async session({ session, token }) {
-      if (token) {
+    async session({ session, token }: any) {
+      if (token?.user) {
         session.user = {
-          id: token.user?.id,
-          email: token.user?.email,
-          name: token.user?.name,
-          isAdmin: token.user?.is_admin,
-          isVendor: token.user?.is_vendor,
-          activeVendor: token.user?.active_vendor,
-          permissions: token.user?.permissions,
-          roles: token.user?.roles,
+          id: token.user.id,
+          email: token.user.email,
+          name: token.user.name,
+          isAdmin: token.user.is_admin,
+          isVendor: token.user.is_vendor,
+          activeVendor: token.user.active_vendor,
+          permissions: token.user.permissions,
+          roles: token.user.roles,
         }
         session.accessToken = token.accessToken
         session.refreshToken = token.refreshToken

@@ -1,17 +1,23 @@
-import { auth } from "@/auth"
 import { Company, Driver, Vehicle, Vendor, Wallet, User, NfcTag, ApiResponse } from "@/types"
 
 const API_BASE_URL = "https://cupidapiv2.smartflowtech.org/api"
 
 class HttpClient {
   private async getHeaders(): Promise<HeadersInit> {
-    const session = await auth()
     const headers: HeadersInit = {
       "Content-Type": "application/json",
     }
 
-    if (session?.accessToken) {
-      headers.Authorization = `Bearer ${session.accessToken}`
+    // Try to get token from localStorage if in client context
+    if (typeof window !== 'undefined') {
+      try {
+        const token = localStorage.getItem('accessToken')
+        if (token) {
+          headers.Authorization = `Bearer ${token}`
+        }
+      } catch (error) {
+        console.warn('Could not get token from localStorage:', error)
+      }
     }
 
     return headers
