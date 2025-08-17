@@ -1,34 +1,33 @@
 import { ReusableDataTable } from "@/components/reusable-data-table"
-import { companyColumns } from "@/components/table-columns"
-import companiesData from "@/data/companies.json"
+import { vehicleColumns } from "@/components/table-columns"
+import vehiclesData from "@/data/vehicles.json"
 
-export default function CompaniesPage() {
+export default function VehiclesPage() {
     const handleRowAction = (action: string, row: any) => {
         console.log(`${action} action for:`, row)
         // Handle different actions (edit, view, duplicate, delete)
     }
 
-    const handleAddCompany = () => {
-        console.log("Add new company")
-        // Handle adding new company
+    const handleAddVehicle = () => {
+        console.log("Add new vehicle")
+        // Handle adding new vehicle
     }
 
     return (
         <div className="container mx-auto py-6">
             <ReusableDataTable
-                data={companiesData}
-                columns={companyColumns}
-                title="Companies"
+                data={vehiclesData}
+                columns={vehicleColumns}
+                title="Vehicles"
                 enableDragAndDrop={false}
                 enableSelection={true}
                 enableColumnVisibility={true}
                 enablePagination={true}
                 pageSize={10}
                 onRowAction={handleRowAction}
-                addButtonText="Add Company"
-                onAddClick={handleAddCompany}
+                addButtonText="Add Vehicle"
+                onAddClick={handleAddVehicle}
             />
         </div>
     )
 }
-
