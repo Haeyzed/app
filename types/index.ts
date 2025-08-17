@@ -73,6 +73,3 @@ export interface Vehicle {
     company?: Company
     driver?: Driver
 }
-
-export type EntityType = "companies" | "drivers" | "vehicles"
-export type EntityData = Company | Driver | Vehicle
